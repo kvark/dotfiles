@@ -14,7 +14,26 @@
   boot.loader = {
     systemd-boot.enable = true;
     efi.canTouchEfiVariables = true;
+    grub.configurationLimit = 3;
   };
+
+  nixpkgs.config.allowUnfree = true;
+  environment.systemPackages = with pkgs; [
+     firefox
+     sublime4
+     fractal
+     neochat
+     renderdoc
+     alacritty
+     git
+     file
+     steam-run-native
+     kwallet-pam
+     plasma5Packages.kwallet
+     plasma5Packages.kmail
+  ];
+
+  security.pam.services.sddm.enableKwallet = true;
 
   networking.hostName = "Theseus";
   # networking.wireless.enable = true;
@@ -59,11 +78,11 @@
     #videoDrivers = [ "intel" ]; # causes windows to jump around
     libinput.enable = true;
     displayManager = {
-      gdm.enable = true; # default is lightDM
+      sddm.enable = true; # default is lightDM
       autoLogin.enable = true;
       autoLogin.user = "kvark";
     };
-    desktopManager.gnome.enable = true;
+    desktopManager.plasma5.enable = true;
     #useGlamor = true;
     #layout = "us";
     #xkbOptions = "eurosign:e";
@@ -87,16 +106,6 @@
      isNormalUser = true;
      extraGroups = [ "wheel" "networkmanager" ];
   };
-
-  nixpkgs.config.allowUnfree = true;
-  environment.systemPackages = with pkgs; [
-     firefox
-     sublime4
-     fractal
-     git
-     file
-     steam-run-native
-  ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.

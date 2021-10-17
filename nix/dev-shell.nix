@@ -21,6 +21,7 @@ mkShell {
     # libraries
     libdrm
     libelf
+    libGL
     alsaLib
     llvmPackages_11.llvm
     # tools
@@ -48,10 +49,13 @@ mkShell {
   
   LIB_PATH = lib.makeLibraryPath [
     vulkan-loader
+    libGL
     xorg.libX11
     xorg.libXi
     xorg.libXcursor
     xorg.libXrandr
+    wayland
+    libxkbcommon
   ];
   shellHook = ''
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_PATH";
