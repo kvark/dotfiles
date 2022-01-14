@@ -12,26 +12,68 @@
 
   # Use the systemd-boot EFI boot loader.
   boot.loader = {
+    timeout = 1;
     systemd-boot.enable = true;
     efi.canTouchEfiVariables = true;
     grub.configurationLimit = 3;
   };
+  # Allow `rr`
+  boot.kernel.sysctl."kernel.perf_event_paranoid" = 1;
 
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.overlays = [
+    (import "/x/code/nixpkgs-mozilla/git-cinnabar-overlay.nix")
+    (import "/x/code/nixpkgs-mozilla/phlay-overlay.nix")
+    #(import "/x/code/nixpkgs-mozilla/firefox-overlay.nix")
+  ];
+
   environment.systemPackages = with pkgs; [
      firefox
      sublime4
-     fractal
-     neochat
+     sublime-merge
+     #fractal
+     obsidian
      renderdoc
-     alacritty
-     git
+     vlc
+     git 
      file
+     unzip
+     unrar
+     p7zip
+     usbutils
+     jmtpfs
      steam-run-native
+     zoom-us
+     #alacritty
+     # KDE aps
+     ark
+     kate
+     cura
+     neochat
+     kget
+     krename
+     # kdiff3
+     krusader
      kwallet-pam
      plasma5Packages.kwallet
      plasma5Packages.kmail
+     # libs
+     libimobiledevice
+     #xorg.xf86inputsynaptics
   ];
+
+  fileSystems."/home/net" = {
+      device = "//home/Net";
+      fsType = "cifs";
+      options = let
+        # this line prevents hanging on network split
+        automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+
+      in ["${automount_opts}"];
+  };
+
+  programs.partition-manager.enable = true;
+  programs.kdeconnect.enable = true;
 
   security.pam.services.sddm.enableKwallet = true;
 
@@ -61,6 +103,18 @@
 
   # SERVICES
 
+  # CIFS shares discovery
+  # services.gvfs.enable = true;
+  services.samba = {
+    enable = true;
+    extraConfig = ''
+      client min protocol = NT1
+    '';
+  };
+
+  services.usbmuxd.enable = true;
+  services.fstrim.enable = true;
+
   services.thermald.enable = true;
   services.tlp = {
     enable = false;
@@ -87,7 +141,13 @@
     #layout = "us";
     #xkbOptions = "eurosign:e";
   };
-  
+
+  services.udev.packages = [
+    pkgs.android-udev-rules
+  ];
+
+  services.gvfs.enable = true;
+
   # Enable CUPS to print documents.
   services.printing.enable = true;
   
@@ -133,6 +193,5 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "21.05"; # Did you read the comment?
-
 }
 
